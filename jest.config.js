@@ -10,7 +10,7 @@ module.exports = {
     "<rootDir>/insurance-frontend/"
   ],
   // Setup coverage
-  collectCoverage: true,
+  collectCoverage: false,
   coverageReporters: ['json', 'lcov', 'text', 'clover'],
   coverageThreshold: {
     global: {

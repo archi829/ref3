@@ -1,31 +1,30 @@
 // src/App.js
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
-import { ReactFlowProvider } from 'reactflow'; // ✅ 1. IMPORT THIS
+import { Routes, Route, Navigate } from 'react-router-dom'; // <-- 1. REMOVED BrowserRouter
 import './App.css';
+import { jwtDecode as decode } from 'jwt-decode'; // Use named import
+
+// Import all components
 import LoginPage from './components/LoginPage';
 import RegistrationPage from './components/RegistrationPage';
 import Dashboard from './components/Dashboard';
 import AdminDashboard from './components/AdminDashboard';
+import AdjusterDashboard from './components/AdjusterDashboard';
+import FileClaim from './components/FileClaim';
 import WorkflowList from './components/WorkflowList';
 import WorkflowEditor from './components/WorkflowEditor';
-import WorkflowDesigner from './components/WorkflowDesigner';
-
-import AdjusterDashboard from "./components/AdjusterDashboard";
-import DocumentProcessor from "./components/DocumentProcessor";
-import HighRiskAlerts from "./components/HighRiskAlerts";
-import WorkflowMetricsDashboard from "./components/WorkflowMetricsDashboard";
-import OverdueTasksReport from "./components/OverdueTasksReport";
-
+import WorkflowDesigner from './components/WorkflowDesigner'; // Your new component
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   const getUser = () => {
-    if (!token) return null;
+    const token = localStorage.getItem('token');
+    if (!token) { // <-- 2. ADDED THIS FIX
+      return null;
+    }
     try {
-      const decoded = jwtDecode(token);
+      const decoded = decode(token);
       if (decoded.exp * 1000 < Date.now()) {
         localStorage.removeItem('token');
         setToken(null);
@@ -47,7 +46,7 @@ function App() {
     setToken(null);
   };
 
-  // Simple AppShell for consistent layout (optional)
+  // Simple AppShell for consistent layout
   const AppShell = ({ children }) => (
     <div className="app-shell">
       <nav className="main-nav">
@@ -61,75 +60,29 @@ function App() {
   );
 
   return (
-    <BrowserRouter>
+    // <BrowserRouter> {/* <-- 3. REMOVED THIS WRAPPER */}
       <div className="App">
         <Routes>
-          {/* ✅ 2. FIX LOGIN: Change 'setToken' to 'onLoginSuccess' */}
-          <Route path="/login" element={!user ? <LoginPage onLoginSuccess={setToken} /> : <Navigate to="/dashboard" replace />} />
-          <Route path="/register" element={!user ? <RegistrationPage /> : <Navigate to="/dashboard" replace />} />
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage setToken={setToken} />} />
+          <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/" element={<Navigate replace to="/login" />} />
 
-          <Route
-            path="/dashboard"
-            element={user ? (
-              <AppShell>
-                {user.isAdmin ? <AdminDashboard /> : <Dashboard />}
-              </AppShell>
-            ) : (
-              <Navigate to="/login" replace />
-            )}
-          />
+          {/* Protected Routes */}
+          <Route path="/dashboard" element={user ? <AppShell><Dashboard user={user} /></AppShell> : <Navigate replace to="/login" />} />
+          <Route path="/file-claim" element={user ? <AppShell><FileClaim /></AppShell> : <Navigate replace to="/login" />} />
 
-          <Route
-            path="/admin/workflows"
-            element={user && user.isAdmin ? (
-              <AppShell>
-                <WorkflowList />
-              </AppShell>
-            ) : (
-              <Navigate to={user ? "/dashboard" : "/login"} replace />
-            )}
-          />
+          {/* Admin Routes */}
+          <Route path="/admin-dashboard" element={user && user.isAdmin ? <AppShell><AdminDashboard /></AppShell> : <Navigate replace to="/login" />} />
+          <Route path="/admin/workflows" element={user && user.isAdmin ? <AppShell><WorkflowList /></AppShell> : <Navigate replace to="/login" />} />
+          <Route path="/admin/workflow-editor/:workflowId" element={user && user.isAdmin ? <AppShell><WorkflowEditor /></AppShell> : <Navigate replace to="/login" />} />
+          <Route path="/admin/workflow-designer/:workflowId" element={user && user.isAdmin ? <AppShell><WorkflowDesigner /></AppShell> : <Navigate replace to="/login" />} />
 
-          <Route
-            path="/admin/workflow-editor/:workflowId"
-            element={user && user.isAdmin ? (
-              <AppShell>
-                <WorkflowEditor />
-              </AppShell>
-            ) : (
-              <Navigate to={user ? "/dashboard" : "/login"} replace />
-            )
-            }
-          />
-
-          <Route
-            path="/admin/workflow-designer/:workflowId"
-            element={user && user.isAdmin ? (
-              <AppShell>
-                {/* ✅ 3. FIX DESIGNER: Add the provider wrapper */}
-                <ReactFlowProvider>
-                  <WorkflowDesigner />
-                </ReactFlowProvider>
-              </AppShell>
-            ) : (
-              <Navigate to={user ? "/dashboard" : "/login"} replace />
-            )}
-          />
-
-          <Route path="/adjuster" element={<AdjusterDashboard />} />
-          <Route path="/documents" element={<DocumentProcessor />} />
-          <Route path="/alerts" element={<HighRiskAlerts />} />
-          <Route path="/metrics" element={<WorkflowMetricsDashboard />} />
-          <Route path="/overdue" element={<OverdueTasksReport />} />
-
-
-          <Route
-            path="*"
-            element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
-          />
+          {/* Adjuster Routes */}
+          <Route path="/adjuster-dashboard" element={user && (user.isAdmin || user.role === 'Adjuster') ? <AppShell><AdjusterDashboard /></AppShell> : <Navigate replace to="/login" />} />
         </Routes>
       </div>
-    </BrowserRouter>
+    // </BrowserRouter> {/* <-- 4. REMOVED THIS WRAPPER */}
   );
 }
 

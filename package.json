@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "jest --config=jest.config.js --detectOpenHandles"
+    "test": "jest && (cd insurance-frontend && npm test)",
+    "coverage": "jest --coverage"
+   
   },
   "keywords": [],
   "author": "",

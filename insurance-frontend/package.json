@@ -2,6 +2,7 @@
   "name": "insurance-frontend-official",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:3001",
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -13,6 +14,7 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^6.30.1",
     "react-scripts": "5.0.1",
+    "reactflow": "^11.11.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -50,8 +52,12 @@
     },
     "transformIgnorePatterns": [
       "/node_modules/(?!(axios)/)"
-    ]
+    ],
+    "moduleNameMapper": {
+    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
   }
-
-
+  },
+  "devDependencies": {
+    "identity-obj-proxy": "^3.0.0"
+  }
 }

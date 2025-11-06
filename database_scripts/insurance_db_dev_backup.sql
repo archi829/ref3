@@ -296,7 +296,6 @@ UNLOCK TABLES;
 
 --
 -- Table structure for table `reminder`
--- (This table is NEW for IWAS-F-041)
 --
 
 DROP TABLE IF EXISTS `reminder`;
@@ -331,7 +330,6 @@ UNLOCK TABLES;
 
 --
 -- Table structure for table `admin_reminder`
--- (This table now correctly follows the 'reminder' table)
 --
 
 DROP TABLE IF EXISTS `admin_reminder`;
@@ -369,6 +367,9 @@ CREATE TABLE `workflows` (
   `workflow_id` varchar(50) NOT NULL,
   `name` varchar(100) NOT NULL,
   `description` text,
+  `definition_json` text COMMENT 'Stores the JSON definition from the visual workflow designer',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`workflow_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -379,7 +380,7 @@ CREATE TABLE `workflows` (
 
 LOCK TABLES `workflows` WRITE;
 /*!40000 ALTER TABLE `workflows` DISABLE KEYS */;
-INSERT INTO `workflows` VALUES ('CLAIM_APPROVAL_V1','Standard Claim Approval','Initial workflow for claims under $500');
+INSERT INTO `workflows` VALUES ('CLAIM_APPROVAL_V1','Standard Claim Approval','Initial workflow for claims under $500',NULL,DEFAULT,DEFAULT);
 /*!40000 ALTER TABLE `workflows` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -411,7 +412,7 @@ CREATE TABLE `workflow_steps` (
 
 LOCK TABLES `workflow_steps` WRITE;
 /*!40000 ALTER TABLE `workflow_steps` DISABLE KEYS */;
-INSERT INTO `workflow_steps` VALUES ('STEP_V1_1','CLAIM_APPROVAL_V1',1,'Assign Claim','RULE','{\"ruleName\": \"assignByAmount\", \"threshold\": 500, \"targetAdminId\": \"ADM002\"}'),('STEP_V1_2','CLAIM_APPROVAL_V1',2,'Manual Review','MANUAL','{\"assignedRole\": \"Junior Adjuster\"}'),('STEP_V1_3','CLAIM_APPROVAL_V1',3,'Notify Customer','API','{\"task\": \"sendNotification\", \"template\": \"claimApproved\"}');
+INSERT INTO `workflow_steps` VALUES ('STEP_V1_1','CLAIM_APPROVAL_V1',1,'Assign Claim','RULE','{\"ruleName\": \"assignByAmount\", \"threshold\": 500, \"targetAdminId\": \"ADM002\"}',DEFAULT,DEFAULT),('STEP_V1_2','CLAIM_APPROVAL_V1',2,'Manual Review','MANUAL','{\"assignedRole\": \"Junior Adjuster\"}',DEFAULT,DEFAULT),('STEP_V1_3','CLAIM_APPROVAL_V1',3,'Notify Customer','API','{\"task\": \"sendNotification\", \"template\": \"claimApproved\"}',DEFAULT,DEFAULT);
 /*!40000 ALTER TABLE `workflow_steps` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -453,23 +454,16 @@ CREATE TABLE `claim` (
 
 LOCK TABLES `claim` WRITE;
 /*!40000 ALTER TABLE `claim` DISABLE KEYS */;
-INSERT INTO `claim` VALUES ('CLM_1761039772069','POL1001','CUST_1761038061124','Annual_check-up','2025-10-21','DECLINED',250.00,'Claim submitted by user.\nClaim declined by admin ADM002.','ADM002',NULL,1),('CLM_1761141526405','POL0002','CUST_1761140956348','Health','2025-10-22','DECLINED',10000.00,'Claim submitted by user.\nClaim declined by admin ADM002.',NULL,NULL,1),('CLM_1761201732504','POL1003','CUST_1761038061124','TEST','2025-10-23','APPROVED',99.00,'Claim submitted by user.\nClaim approved by admin ADM002.',NULL,NULL,1),('CLM_1761206908731','POL1001','CUST_1761038061124','MED','2025-10-23','DECLINED',100.00,'Claim submitted by user.\nClaim declined by admin ADM002.',NULL,NULL,2),('CLM_1761213442232','POL1002','CUST_1761038061124','Workflow Test Correct Policy','2025-10-23','PENDING',300.00,'Claim submitted by user.','ADM002','CLAIM_APPROVAL_V1',2),('CLM_DEV_TEST','POL1001','CUST0001','Claim for physiotherapy session','2025-10-19','APPROVED',3000.00,'Claim submitted in dev.\nAssigned to adjuster.\nClaim approved by adjuster.','ADM002',NULL,1),('CLM001','POL0001','CUST_1761038061124','Medical treatment claim','2025-10-04','APPROVED',5000.00,'Claim submitted for review\nClaim approved by admin ADM002.','ADM001',NULL,1),('CLM002','POL0001','CUST001','Emergency surgery','2025-10-04','APPROVED',8000.00,'Claim approved after review','ADM001',NULL,1),('CLM003','POL1001','CUST0001','Claim for annual health check-up','2025-10-19','APPROVED',2500.00,'Claim submitted via API.\nAssigned to adjuster ADM002.\nClaim approved by ADM002. Payment pending.','ADM002',NULL,1),('CLM004','POL1002','CUST0002','Claim for cosmetic dental work','2025-10-19','DECLINED',7500.00,'Claim submitted via API.\nAssigned to adjuster ADM002.\nClaim declined by ADM002. Cosmetic procedures not covered.','ADM002',NULL,1);
+INSERT INTO `claim` VALUES ('CLM_1761039772069','POL1001','CUST_1761038061124','Annual_check-up','2025-10-21','DECLINED',250.00,'Claim submitted by user.\nClaim declined by admin ADM002.','ADM002',NULL,1,0),('CLM_1761141526405','POL0002','CUST_1761140956348','Health','2025-10-22','DECLINED',10000.00,'Claim submitted by user.\nClaim declined by admin ADM002.',NULL,NULL,1,0),('CLM_1761201732504','POL1003','CUST_1761038061124','TEST','2025-10-23','APPROVED',99.00,'Claim submitted by user.\nClaim approved by admin ADM002.',NULL,NULL,1,0),('CLM_1761206908731','POL1SESSION_1001','CUST_1761038061124','MED','2025-10-23','DECLINED',100.00,'Claim submitted by user.\nClaim declined by admin ADM002.',NULL,NULL,2,0),('CLM_1761213442232','POL1002','CUST_1761038061124','Workflow Test Correct Policy','2025-10-23','PENDING',300.00,'Claim submitted by user.','ADM002','CLAIM_APPROVAL_V1',2,0),('CLM_DEV_TEST','POL1001','CUST0001','Claim for physiotherapy session','2025-10-19','APPROVED',3000.00,'Claim submitted in dev.\nAssigned to adjuster.\nClaim approved by adjuster.','ADM002',NULL,1,0),('CLM001','POL0001','CUST_1761038061124','Medical treatment claim','2025-10-04','APPROVED',5000.00,'Claim submitted for review\nClaim approved by admin ADM002.','ADM001',NULL,1,0),('CLM002','POL0001','CUST001','Emergency surgery','2025-10-04','APPROVED',8000.00,'Claim approved after review','ADM001',NULL,1,0),('CLM003','POL1001','CUST0001','Claim for annual health check-up','2025-10-19','APPROVED',2500.00,'Claim submitted via API.\nAssigned to adjuster ADM002.\nClaim approved by ADM002. Payment pending.','ADM002',NULL,1,0),('CLM004','POL1002','CUST0002','Claim for cosmetic dental work','2025-10-19','DECLINED',7500.00,'Claim submitted via API.\nAssigned to adjuster ADM002.\nClaim declined by ADM002. Cosmetic procedures not covered.','ADM002',NULL,1,0);
 /*!40000 ALTER TABLE `claim` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Triggers for table `claim`
+-- Triggers - FIXED VERSION
 --
 
 DELIMITER $$
-/*!50003 SET @saved_cs_client      = @@character_set_client */ $$
-/*!50003 SET @saved_cs_results     = @@character_set_results */ $$
-/*!50003 SET @saved_col_connection = @@collation_connection */ $$
-/*!50003 SET character_set_client  = utf8mb4 */ $$
-/*!50003 SET character_set_results = utf8mb4 */ $$
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ $$
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ $$
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ $$
+
 CREATE TRIGGER `after_claim_status_update` AFTER UPDATE ON `claim` FOR EACH ROW BEGIN
     DECLARE v_notification_id VARCHAR(50);
     
@@ -481,27 +475,8 @@ CREATE TRIGGER `after_claim_status_update` AFTER UPDATE ON `claim` FOR EACH ROW 
                 CONCAT('Your claim ', NEW.claim_id, ' status has been updated to: ', NEW.claim_status),
                 'CLAIM_UPDATE', NEW.customer_id);
     END IF;
-END $$
-/*!50003 SET sql_mode              = @saved_sql_mode */ $$
-/*!50003 SET character_set_client  = @saved_cs_client */ $$
-/*!50003 SET character_set_results = @saved_cs_results */ $$
-/*!50003 SET collation_connection  = @saved_col_connection */ $$
+END$$
 
-DELIMITER ;
-
---
--- Triggers for table `payment`
---
-
-DELIMITER $$
-/*!50003 SET @saved_cs_client      = @@character_set_client */ $$
-/*!50003 SET @saved_cs_results     = @@character_set_results */ $$
-/*!50003 SET @saved_col_connection = @@collation_connection */ $$
-/*!50003 SET character_set_client  = utf8mb4 */ $$
-/*!50003 SET character_set_results = utf8mb4 */ $$
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ $$
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ $$
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ $$
 CREATE TRIGGER `after_payment_success` AFTER INSERT ON `payment` FOR EACH ROW BEGIN
     DECLARE v_notification_id VARCHAR(50);
     DECLARE v_customer_id VARCHAR(50);
@@ -520,27 +495,8 @@ CREATE TRIGGER `after_payment_success` AFTER INSERT ON `payment` FOR EACH ROW BE
                 CONCAT('Payment successful for policy ', v_policy_id, ' via ', NEW.payment_mode),
                 'PAYMENT_SUCCESS', v_customer_id);
     END IF;
-END $$
-/*!50003 SET sql_mode              = @saved_sql_mode */ $$
-/*!50003 SET character_set_client  = @saved_cs_client */ $$
-/*!50003 SET character_set_results = @saved_cs_results */ $$
-/*!50003 SET collation_connection  = @saved_col_connection */ $$
+END$$
 
-DELIMITER ;
-
---
--- Triggers for table `policy`
---
-
-DELIMITER $$
-/*!50003 SET @saved_cs_client      = @@character_set_client */ $$
-/*!50003 SET @saved_cs_results     = @@character_set_results */ $$
-/*!50003 SET @saved_col_connection = @@collation_connection */ $$
-/*!50003 SET character_set_client  = utf8mb4 */ $$
-/*!50003 SET character_set_results = utf8mb4 */ $$
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ $$
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ $$
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ $$
 CREATE TRIGGER `after_policy_insert` AFTER INSERT ON `policy` FOR EACH ROW BEGIN
     DECLARE v_notification_id VARCHAR(50);
     DECLARE v_customer_id VARCHAR(50);
@@ -556,20 +512,8 @@ CREATE TRIGGER `after_policy_insert` AFTER INSERT ON `policy` FOR EACH ROW BEGIN
     VALUES (v_notification_id, DATE_ADD(NEW.start_date, INTERVAL -7 DAY), 'PENDING',
             CONCAT('Payment reminder for policy ', NEW.policy_id, '. Premium amount: Rs.', NEW.premium_amount),
             'PAYMENT_REMINDER', v_customer_id);
-END $$
-/*!50003 SET sql_mode              = @saved_sql_mode */ $$
-/*!50003 SET character_set_client  = @saved_cs_client */ $$
-/*!50003 SET character_set_results = @saved_cs_results */ $$
-/*!50003 SET collation_connection  = @saved_col_connection */ $$
+END$$
 
-/*!50003 SET @saved_cs_client      = @@character_set_client */ $$
-/*!50003 SET @saved_cs_results     = @@character_set_results */ $$
-/*!50003 SET @saved_col_connection = @@collation_connection */ $$
-/*!50003 SET character_set_client  = utf8mb4 */ $$
-/*!50003 SET character_set_results = utf8mb4 */ $$
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ $$
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ $$
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ $$
 CREATE TRIGGER `policy_renewal_reminder` AFTER INSERT ON `policy` FOR EACH ROW BEGIN
     DECLARE v_notification_id VARCHAR(50);
     DECLARE v_customer_id VARCHAR(50);
@@ -585,20 +529,8 @@ CREATE TRIGGER `policy_renewal_reminder` AFTER INSERT ON `policy` FOR EACH ROW B
     VALUES (v_notification_id, DATE_SUB(NEW.end_date, INTERVAL 30 DAY), 'PENDING',
             CONCAT('Policy ', NEW.policy_id, ' expires on ', NEW.end_date, '. Please renew to continue coverage.'),
             'RENEWAL_REMINDER', v_customer_id);
-END $$
-/*!50003 SET sql_mode              = @saved_sql_mode */ $$
-/*!50003 SET character_set_client  = @saved_cs_client */ $$
-/*!50003 SET character_set_results = @saved_cs_results */ $$
-/*!50003 SET collation_connection  = @saved_col_connection */ $$
+END$$
 
-/*!50003 SET @saved_cs_client      = @@character_set_client */ $$
-/*!50003 SET @saved_cs_results     = @@character_set_results */ $$
-/*!50003 SET @saved_col_connection = @@collation_connection */ $$
-/*!50003 SET character_set_client  = utf8mb4 */ $$
-/*!50003 SET character_set_results = utf8mb4 */ $$
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ $$
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ $$
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ $$
 CREATE TRIGGER `after_policy_insert_assign_agent` AFTER INSERT ON `policy` FOR EACH ROW BEGIN
     DECLARE new_agent_policy_id VARCHAR(50);
     
@@ -606,48 +538,12 @@ CREATE TRIGGER `after_policy_insert_assign_agent` AFTER INSERT ON `policy` FOR E
     
     INSERT INTO agent_policy (id, policy_id, agent_id) 
     VALUES (new_agent_policy_id, NEW.policy_id, 'AGT001');
-END $$
-/*!50003 SET sql_mode              = @saved_sql_mode */ $$
-/*!50003 SET character_set_client  = @saved_cs_client */ $$
-/*!50003 SET character_set_results = @saved_cs_results */ $$
-/*!50003 SET collation_connection  = @saved_col_connection */ $$
+END$$
 
 DELIMITER ;
 
--- Compatibility layer for legacy audit_log code
-CREATE VIEW bhargavi_audit_log AS 
-SELECT 
-    audit_log_id as log_id,
-    user_id,
-    user_type,
-    action_type,
-    entity_id,
-    details,
-    timestamp
-FROM audit_log;
-
-DELIMITER //
-CREATE TRIGGER instead_of_insert_bhargavi_audit_log
-INSTEAD OF INSERT ON bhargavi_audit_log
-FOR EACH ROW
-BEGIN
-    -- Convert user_type to uppercase and validate
-    SET @valid_user_type = UPPER(NEW.user_type);
-    IF @valid_user_type NOT IN ('CUSTOMER', 'ADMIN') THEN
-        SET @valid_user_type = 'CUSTOMER'; -- Default fallback
-    END IF;
-    
-    -- Convert text details to JSON object if not valid JSON
-    IF NEW.details IS NOT NULL AND JSON_VALID(NEW.details) = 0 THEN
-        SET @converted_details = JSON_OBJECT('legacy_text', NEW.details);
-    ELSE
-        SET @converted_details = NEW.details;
-    END IF;
-    
-    INSERT INTO audit_log (user_id, user_type, action_type, entity_id, details)
-    VALUES (NEW.user_id, @valid_user_type, NEW.action_type, NEW.entity_id, @converted_details);
-END//
-DELIMITER ;
+-- Remove any problematic INSERT statements for reminder table
+-- The triggers above will handle all reminder inserts correctly
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -658,5 +554,3 @@ DELIMITER ;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed

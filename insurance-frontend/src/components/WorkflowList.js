@@ -13,7 +13,8 @@ function WorkflowList() {
       setError(null);
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:3001/api/admin/workflows', {
+        // Using relative path for proxy
+        const response = await fetch('/api/admin/workflows', { 
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -38,42 +39,51 @@ function WorkflowList() {
   if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="workflow-list-container card-container"> {/* Reusing card style */}
-      <h2>Manage Workflows ⚙️</h2>
-      <Link to="/admin/workflows/new"> {/* Link to create a new workflow */}
-        <button className="button-primary" style={{ width: 'auto', marginBottom: '20px' }}>
-          + Create New Workflow
-        </button>
-      </Link>
-
+    // Reverting the centering div to match your original layout
+    <div className="workflow-list-container card-container"> 
+      <h2>Manage Workflows</h2>
       {workflows.length === 0 ? (
-        <p>No workflows defined yet.</p>
+        <p>No workflows found.</p>
       ) : (
-        <table className="workflows-table"> {/* Similar style to claims table */}
-          <thead>
-            <tr>
-              <th>Workflow ID</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {workflows.map(wf => (
-              <tr key={wf.workflow_id}>
-                <td>{wf.workflow_id}</td>
-                <td>{wf.name}</td>
-                <td>{wf.description || '-'}</td>
-                <td>
-                  <Link to={`/admin/workflows/${wf.workflow_id}`}>
-                    <button className="action-button view-button">Edit</button>
-                  </Link>
-                  {/* Add Delete button/logic here later */}
-                </td>
+        <>
+          <table className="claims-table"> 
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                {/* ✅ 1. Updated headers for clarity */}
+                <th>Text Editor</th> 
+                <th>Visual Editor</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {workflows.map(wf => (
+                <tr key={wf.workflow_id}>
+                  <td>{wf.workflow_id}</td>
+                  <td>{wf.name}</td>
+                  <td>{wf.description || '-'}</td>
+                  
+                  {/* ✅ 2. Added link to the Text Editor */}
+                  <td>
+                    <Link to={`/admin/workflow-editor/${wf.workflow_id}`}>
+                      <button className="action-button view-button">Edit Steps</button>
+                    </Link>
+                  </td>
+                  
+                  {/* ✅ 3. Added link to the Visual Designer */}
+                  <td>
+                    <Link to={`/admin/workflow-designer/${wf.workflow_id}`}>
+                      <button className="action-button">Edit Visual</button>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* ✅ 4. Removed the old "Quick Edit Links" list */}
+        </>
       )}
     </div>
   );

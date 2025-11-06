@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Tests passed (placeholder)\" && exit 0"
+    "test": "jest && (cd insurance-frontend && npm test)",
+    "coverage": "jest --coverage"
+   
   },
   "keywords": [],
   "author": "",
@@ -25,18 +27,14 @@
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
-    "babel-jest": "^30.2.0"
+    "babel-jest": "^30.2.0",
+    "jest": "^30.2.0",
+    "supertest": "^7.1.4"
   },
-
   "babel": {
-    "presets": ["@babel/preset-env", "@babel/preset-react"]
-  },
-
-  "jest": {
-  "transform": {
-    "^.+\\.(js|jsx)$": "babel-jest"
-  },
-  "moduleFileExtensions": ["js", "jsx"]
-}
-
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  }
 }

@@ -116,3 +116,41 @@ This project is developed for educational purposes as part of the PES University
 **Institution:** PES University  
 **Academic Year:** 2025  
 **Semester:** 5th Sem
+
+
+## CI/CD Pipeline
+
+This project uses a 6-stage CI/CD pipeline implemented with GitHub Actions to ensure code quality and create a deployment artifact. The pipeline runs on every push to the `main` or `fix/correct-ci-workflow` branches.
+
+### 1. Build
+* **Job:** `build`
+* **Action:** Installs all `npm` dependencies for both the backend (root) and the `insurance-frontend` using `npm ci`.
+
+### 2. Test
+* **Job:** `test`
+* **Needs:** `build`
+* **Action:** Runs the full test suite (`npm test`) for both backend and frontend.
+
+### 3. Coverage
+* **Job:** `coverage`
+* **Needs:** `build`
+* **Action:** Runs `npm test -- --coverage` for both backend and frontend.
+* **Quality Gate:** This job will fail if the total test coverage (lines, statements, branches, functions) is **less than 75%** (this is configured in `jest.config.js` and `insurance-frontend/package.json` in the `fix/correct-ci-workflow` branch).
+* **Artifact:** Uploads the `backend-coverage-report` and `frontend-coverage-report` artifacts.
+
+### 4. Lint
+* **Job:** `lint`
+* **Needs:** `build`
+* **Action:** Runs `npm run lint` for both backend and frontend to check for code style and syntax errors.
+* **Artifact:** Uploads the `backend-lint-report` and `frontend-lint-report` artifacts.
+
+### 5. Security Audit
+* **Job:** `security`
+* **Needs:** `build`
+* **Action:** Runs `npm audit --json` for both backend and frontend to check for known security vulnerabilities in dependencies.
+* **Artifact:** Uploads the `backend-security-report` and `frontend-security-report` artifacts.
+
+### 6. Create Deployment Artifact
+* **Job:** `create-artifact`
+* **Needs:** `test`, `coverage`, `lint`, `security` (Runs only if all previous CI stages pass)
+* **Action:** Downloads all generated reports (coverage, lint, security), zips them together with the entire source code (excluding `node_modules`), and uploads the final `deployment-artifact.zip`.

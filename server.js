@@ -1560,20 +1560,6 @@ app.get('/api/reports/overdue-tasks', async (req, res) => {
 
 
 // --- 10. Start the Server ---
-
-// Use process.env.PORT directly to fix the "PORT is not defined" ReferenceError in tests
-const PORT_FOR_LISTEN = process.env.PORT || 3001;
-
-// Only start the console.log listener if not in a test environment
-let server;
-if (process.env.NODE_ENV !== 'test') {
-  server = app.listen(PORT_FOR_LISTEN, () => {
-    console.log(`Server running on port ${PORT_FOR_LISTEN}`);
-  });
-} else {
-  // In test, just export the app for supertest to listen on a random port
-  server = app;
-}
-
-// Export app, server, AND the cron task (to fix the open handle)
-module.exports = { app, server, task };
+app.listen(port, () => {
+    console.log(`✅ Backend API server running at http://localhost:${port}`);
+});

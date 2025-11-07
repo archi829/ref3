@@ -52,12 +52,6 @@
     },
     "transformIgnorePatterns": [
       "/node_modules/(?!(axios)/)"
-    ],
-    "moduleNameMapper": {
-    "\\.(css|less|scss|sass)$": "identity-obj-proxy"
-  }
-  },
-  "devDependencies": {
-    "identity-obj-proxy": "^3.0.0"
+    ]
   }
 }

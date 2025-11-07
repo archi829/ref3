@@ -46,9 +46,8 @@ function LoginPage({ onLoginSuccess }) {
         {error && <div className="error">{error}</div>}
 
         <div className="form-group">
-          <label htmlFor="email">Email</label>
+          <label>Email</label>
           <input
-            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -56,9 +55,8 @@ function LoginPage({ onLoginSuccess }) {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="password">Password</label>
+          <label>Password</label>
           <input
-            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
